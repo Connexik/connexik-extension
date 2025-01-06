@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getSession, signInWithLinkedIn } from "./services/auth";
+import { getSession, signInWithLinkedIn } from "./services/background";
 
 const Popup = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

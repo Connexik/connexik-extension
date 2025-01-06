@@ -6,10 +6,11 @@ import type {
 } from "plasmo";
 import { createRoot } from "react-dom/client";
 import profileScraper from "~services/profile-scraper";
+import { extractLoggedInUserDetails } from "~services/user";
 
 // Plasmo Content Script Configuration
 export const config: PlasmoCSConfig = {
-  matches: ["*://linkedin.com/*", "*://www.linkedin.com/*"],
+  matches: ["*://plasmo.com/in/*connexik-scan=true", "*://www.plasmo.com/in/*connexik-scan=true"],
   all_frames: true,
   run_at: "document_end", // Ensures script runs after the DOM is fully loaded
 };
@@ -62,8 +63,8 @@ const ExtractButton = () => {
         onClick={profileScraper.scrapper}
         style={{
           position: "fixed",
-          top: "10px",
-          right: "10px",
+          bottom: "10px",
+          left: "10px",
           backgroundColor: "#0073b1",
           color: "#fff",
           padding: "10px 20px",

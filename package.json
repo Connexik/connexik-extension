@@ -12,6 +12,7 @@
     "lint:fix": "pnpm exec eslint . --fix"
   },
   "dependencies": {
+    "micromatch": "^4.0.8",
     "plasmo": "0.89.4",
     "react": "18.2.0",
     "react-dom": "18.2.0"
@@ -20,6 +21,7 @@
     "@ianvs/prettier-plugin-sort-imports": "4.1.1",
     "@parcel/core": "^2.13.3",
     "@types/chrome": "0.0.258",
+    "@types/micromatch": "^4.0.9",
     "@types/node": "20.11.5",
     "@types/react": "18.2.48",
     "@types/react-dom": "18.2.18",
@@ -34,6 +36,17 @@
     "typescript": "5.3.3"
   },
   "manifest": {
+    "web_accessible_resources": [
+      {
+        "resources": [
+          "assets/connexik-*.png"
+        ],
+        "matches": [
+          "*://linkedin.com/*",
+          "*://www.linkedin.com/*"
+        ]
+      }
+    ],
     "host_permissions": [
       "*://www.linkedin.com/*",
       "*://linkedin.com/*"

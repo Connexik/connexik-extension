@@ -1,19 +1,20 @@
 import axios from "axios";
 
 const CLIENT_ID = "86xutk8qjyq5n5";
-const REDIRECT_URI = chrome.identity.getRedirectURL("linkedin");
 const AUTH_URL = `https://www.linkedin.com/oauth/v2/authorization`;
 const TOKEN_URL = `https://www.linkedin.com/oauth/v2/accessToken`;
 
 export const signInWithLinkedIn = async () => {
-  const authUrl = `${AUTH_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=openid%20profile%20email`;
+  const REDIRECT_URI = chrome.identity.getRedirectURL("linkedin");
+  const authUrl = `${AUTH_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=openid%20profile%20email%20r_1st_connections_size%20r_basicprofile`;
 
-  console.log(authUrl)
+
+  console.log("authUrl - ",authUrl);
   return new Promise<void>((resolve, reject) => {
     chrome.identity.launchWebAuthFlow(
       { url: authUrl, interactive: true },
       async (redirectUrl) => {
-        console.log(redirectUrl);
+        console.log("redirectUrl - ", redirectUrl);
 
         if (chrome.runtime.lastError || !redirectUrl) {
           reject(chrome.runtime.lastError?.message || "Authentication failed");
@@ -42,7 +43,12 @@ export const signInWithLinkedIn = async () => {
           );
 
           const { access_token } = response.data;
-          chrome.storage.local.set({ session: access_token, data: response.data });
+
+          console.log(response.data);
+
+          localStorage.setItem("connexik:user", response.data);
+
+          chrome.storage.local.set({ session: access_token, data: JSON.stringify(response.data) });
           resolve();
         } catch (err) {
             console.log(err);
@@ -56,7 +62,8 @@ export const signInWithLinkedIn = async () => {
 export const getSession = async () => {
   return new Promise<string | null>((resolve) => {
     chrome.storage.local.get("session", (result) => {
-      resolve(result.session || null);
+      console.log("sesssionsssss - ", result)
+      resolve(null);
     });
   });
 };

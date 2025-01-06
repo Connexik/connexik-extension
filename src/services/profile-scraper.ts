@@ -1,13 +1,15 @@
-const scrapper = async () => {
-    console.log("Extracting LinkedIn profile data...");
+import OverlayManager from "~components/loader";
+import type { ConnexikUser } from "~server/types/user.type";
+import { extractLoggedInUserDetails, saveUserDetails } from "./user";
 
-    // Extract the username from the URL
-    const username = window.location.pathname.split("/")[2];
-    console.log("Username:", username);
+const processor = async () =>  {    
+    const userDetails: ConnexikUser = await extractLoggedInUserDetails();
 
     const mainHTML = Array.from(document.querySelectorAll("main")).find((main) => {
       return main.querySelectorAll("section.artdeco-card").length > 1;
     }).outerHTML;
+
+    OverlayManager.show("Convex AI is now analysing the profile...");
 
     // 3. Define improved instructions for the LLM
     const baseInstruction = `Your job is to extract the person's:
@@ -35,46 +37,62 @@ If a field is missing or cannot be determined, leave it blank, but keep the JSON
 
     console.log(promptForCard);
 
-    const response = await fetch(geminiApiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: promptForCard,
-              },
-            ],
-          },
-        ],
-      }),
-    });
+    // const response = await fetch(geminiApiUrl, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     contents: [
+    //       {
+    //         parts: [
+    //           {
+    //             text: promptForCard,
+    //           },
+    //         ],
+    //       },
+    //     ],
+    //   }),
+    // });
 
-    if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
-    }
+    // if (!response.ok) {
+    //   throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    // }
 
-    // Parse the JSON response from Gemini
-    const data = await response.json();
+    // // Parse the JSON response from Gemini
+    // const data = await response.json();
 
-    console.log("Usage - ", JSON.stringify(data.usageMetadata));
+    // console.log("Usage - ", JSON.stringify(data.usageMetadata));
 
-    // Extract the generated text from the response
-    const generatedText = data.candidates[0].content.parts[0].text;
+    // // Extract the generated text from the response
+    // const generatedText = data.candidates[0].content.parts[0].text;
 
-    console.log(generatedText);
+    // console.log(generatedText);
 
-    const finalData = generatedText.replaceAll('```json\n', '').replaceAll('```', '').trim()
-    console.log(finalData)
+    // const finalData = generatedText.replaceAll('```json\n', '').replaceAll('```', '').trim()
+    // console.log(finalData)
 
-    console.log("Gemini API Result for card:", JSON.parse(finalData));
+    // console.log("Gemini API Result for card:", JSON.parse(finalData));
 
-    // Optionally, do something with the result
-    alert("Profile data processed successfully!");
+    const response = userDetails;
+    response.isScanned = true;
+
+    saveUserDetails(response);
+    
+    const wait = (time: number) => new Promise(res => setTimeout(res, time * 1000));
+
+    await wait(3);
+    OverlayManager.showSuccess();
+
+    await wait(3);
+    OverlayManager.hide();
 }
+
+const scrapper = () => new Promise((res) => {
+  OverlayManager.show("Extracting data from LinkedIn...");
+
+  setTimeout(async () => res(await processor()), 0);
+})
 
 export default {
     scrapper
