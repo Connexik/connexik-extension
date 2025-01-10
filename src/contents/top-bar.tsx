@@ -20,6 +20,18 @@ export const config: PlasmoCSConfig = {
   run_at: "document_end", // Ensures script runs after the DOM is fully loaded
 };
 
+const isOnProfile = (username: string) => {
+  return MicroMatch.isMatch(
+    window.location.href,
+    [
+      `*://linkedin.com/in/${username}/`,
+      `*://www.linkedin.com/in/${username}/`,
+      `*://linkedin.com/in/${username}/*`,
+      `*://www.linkedin.com/in/${username}/*`,
+    ]
+  );
+}
+
 const TopBar = () => {
   const [loggedInUser, setLoggedInUser] = useState<ConnexikUser | null>(null);
   const [showTopBar, setShowTopBar] = useState<Boolean>(false);
@@ -44,18 +56,22 @@ const TopBar = () => {
     fetchUserDetails();
   }, []);
 
+  const processTopBar = () => {
+    setShowTopBar(isOnProfile(loggedInUser?.username));
+  }
+
+  let oldURL = window.location.href;
+  const observer = new MutationObserver(() => {
+    if(oldURL !== window.location.href){
+      oldURL = window.location.href;
+      processTopBar();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  
   useEffect(() => {
     if (loggedInUser) {
-      const isOnProfile = MicroMatch.isMatch(
-        window.location.href,
-        [
-          `*://linkedin.com/in/${loggedInUser.lIdentifier}/*`,
-          `*://www.linkedin.com/in/${loggedInUser.lIdentifier}/*`,
-        ]
-      );
-
-      console.log(isOnProfile);
-      setShowTopBar(isOnProfile);
+      processTopBar();
     }
   }, [loggedInUser]);
   
@@ -64,11 +80,10 @@ const TopBar = () => {
       return
     }
 
-    const isOnProfile = MicroMatch.isMatch(window.location.href, [`*://linkedin.com/in/${loggedInUser?.lIdentifier}/*`, `*://www.linkedin.com/in/${loggedInUser?.lIdentifier}/*`]);
-    if(isOnProfile){
+    if(isOnProfile(loggedInUser?.username)){
       await profileScraper.scrapper();
     } else {
-      window.open(`https://www.linkedin.com/in/${loggedInUser.lIdentifier}/?connexik-scan=true`, "_self")
+      window.open(`https://www.linkedin.com/in/${loggedInUser?.username}/?connexik-scan=true`, "_self")
     }
   };
 
@@ -114,7 +129,7 @@ const TopBar = () => {
                   {loggedInUser?.firstName} {loggedInUser?.lastName}             
                 </div>
                 <div className="artdeco-entity-lockup__subtitle">
-                  {loggedInUser?.occupation}
+                  {loggedInUser?.title}
                 </div>
               </div>
             </div>

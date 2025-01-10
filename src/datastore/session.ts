@@ -6,7 +6,7 @@ const listeners = [];
 
 const registerChangeUserData = (callback: Function) => listeners.push(callback);
 
-chrome.storage.session.onChanged.addListener((changes) => {
+chrome.storage.local.onChanged.addListener((changes) => {
     for (const [key, { newValue }] of Object.entries(changes)) {
         if(key === `${keyPrefix}:linkedin:user`){
             listeners.forEach((callback: Function) => callback(newValue));

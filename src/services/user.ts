@@ -18,9 +18,9 @@ export const extractLoggedInUserDetails = async () => {
           );  
           if (userMiniProfile) {
             userDetails = {
-              lId: data.data.plainId,
-              lIdentifier: userMiniProfile.publicIdentifier,
-              occupation: userMiniProfile.occupation,
+              identifier: data.data.plainId,
+              username: userMiniProfile.publicIdentifier,
+              title: userMiniProfile.occupation,
               firstName: userMiniProfile.firstName,
               lastName: userMiniProfile.lastName,
               profileUrl: userMiniProfile.picture?.rootUrl + userMiniProfile.picture?.artifacts?.[1].fileIdentifyingUrlPathSegment
@@ -37,7 +37,7 @@ export const extractLoggedInUserDetails = async () => {
     }
 
     const cacheData = await DataStore.getUserData();
-    if(cacheData.lId === userDetails.lId){
+    if(cacheData.identifier === userDetails.identifier){
       return cacheData;
     }
 

@@ -1,8 +1,8 @@
 
 export type UserDetails = {
-    lId: number,
-    lIdentifier: string,
-    occupation: string,
+    identifier: number,
+    username: string,
+    title: string,
     firstName: string,
     lastName: string,
     profileUrl: string
@@ -12,11 +12,11 @@ export type ConnexikUser = {
     isScanned: boolean,
     isLoggedIn: boolean,
     connexikId: string,
-    lId: number,
+    identifier: number,
     firstName: string,
     lastName: string,
-    lIdentifier: string,
-    occupation: string,
+    username: string,
+    title: string,
     profileUrl: string,
     rescanTs: number
 }

@@ -7,6 +7,7 @@ import type {
 import { createRoot } from "react-dom/client";
 import { extractLoggedInUserDetails } from "~services/user";
 import type { ConnexikUser } from "~server/types/user.type";
+import { acceptFilterConnections } from "~services/accept-connection";
 
 // Plasmo Content Script Configuration
 export const config: PlasmoCSConfig = {
@@ -17,6 +18,17 @@ export const config: PlasmoCSConfig = {
   all_frames: true,
   run_at: "document_end", // Ensures script runs after the DOM is fully loaded
 };
+
+// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+//   console.log(message)
+//   // if (message.type === "EVENT_FROM_BACKGROUND") {
+//     console.log("Received message from background:", message.data, message.data.url);
+
+//     // Perform actions based on the message
+//     document.body.style.backgroundColor = "lightblue"; // Example action
+//     sendResponse({ success: true });
+//   // }/
+// });
 
 const AcceptConnections: React.FC = () => {
   const [filters, setFilters] = useState({
@@ -51,12 +63,12 @@ const AcceptConnections: React.FC = () => {
   };
 
   const applyFilters = () => {
-    console.log("Filters Applied:", filters);
     console.log(loggedInUser)
-    if (!loggedInUser.isScanned) {
+    if (!loggedInUser?.isScanned) {
       setModalOpen(true);
+      return;
     }
-    // Implement filtering logic here
+    acceptFilterConnections();
   };
 
   const closeModal = () => {
@@ -142,7 +154,7 @@ const AcceptConnections: React.FC = () => {
               : ""
           }
         >
-          <span style={{ display: loggedInUser.isScanned ? "none" : "inherit" }}>
+          <span style={{ display: loggedInUser?.isScanned ? "none" : "inherit" }}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -194,7 +206,7 @@ const AcceptConnections: React.FC = () => {
                 </div>
                 <div className="text-align-center pv4" style={{borderBottom: "1px solid rgba(0,0,0,.15)"}}>
                   <button
-                    onClick={() => { window.open(`https://www.linkedin.com/in/${loggedInUser.lIdentifier}/?connexik-scan=true`, "_self") }}
+                    onClick={() => { window.open(`https://www.linkedin.com/in/${loggedInUser?.username}/?connexik-scan=true`, "_self") }}
                     className="artdeco-button artdeco-button--primary mh1 pv2"
                   >
                     Scan My Profile
