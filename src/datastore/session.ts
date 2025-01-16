@@ -22,7 +22,7 @@ const setUserData = (user: ConnexikUser): Promise<StorageResponse> => {
 
 const getUserData = (): Promise<ConnexikUser> => {
     return new Promise((resolve, reject) => 
-        chrome.storage.local.get(`${keyPrefix}:linkedin:user`).then((val: ConnexikUser) => resolve(val)).catch((e: Error) => { reject({success: false, error: e}) })
+        chrome.storage.local.get(`${keyPrefix}:linkedin:user`).then((val) => resolve(val[`${keyPrefix}:linkedin:user`])).catch((e: Error) => { reject({success: false, error: e}) })
     );
 }
 

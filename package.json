@@ -5,13 +5,18 @@
   "description": "Automate your LinkedIn networking with smart tools to accept connection requests and grow your professional reach effortlessly.",
   "author": "Deepam Kapur <deepamkapur@gmail.com>",
   "scripts": {
-    "dev": "plasmo dev",
+    "dev:script": "node scripts.js",
+    "dev:plasmo": "plasmo dev",
+    "dev": "pnpm --parallel run \"/^dev:.*/\"",
     "build": "plasmo build",
     "package": "plasmo package",
     "lint": "pnpm exec eslint .",
     "lint:fix": "pnpm exec eslint . --fix"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "chokidar": "^4.0.3",
     "micromatch": "^4.0.8",
     "plasmo": "0.89.4",
     "react": "18.2.0",
@@ -32,6 +37,7 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-react": "^7.37.3",
     "eslint-plugin-react-hooks": "^5.1.0",
+    "npm-run-all": "^4.1.5",
     "prettier": "3.2.4",
     "typescript": "5.3.3"
   },

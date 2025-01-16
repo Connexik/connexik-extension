@@ -2,8 +2,50 @@ import DataStore from "../datastore/session";
 import type { ConnexikUser, UserDetails } from "~server/types/user.type";
 import userServer from "~server/user";
 
+const getCodeBlock = () => {
+  // Helper function to query a specific document (top window or iframe)
+  const queryCodeBlocks = (doc) => {
+    try {
+      const blocks = doc.querySelectorAll('code[id^="bpr-guid-"]');
+      if (blocks.length) {
+        return blocks;
+      }
+    } catch (error) {
+      console.error("Error querying document:", error);
+    }
+  };
+
+  // Query the top document
+  let codeBlock = queryCodeBlocks(document);
+  if(codeBlock){
+    return codeBlock;
+  }
+
+  // Query all iframes
+  const iframes = document.querySelectorAll("iframe");
+  iframes.forEach((iframe) => {
+    try {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      if (iframeDoc) {
+        codeBlock = queryCodeBlocks(iframeDoc);
+        if(codeBlock){
+          return;
+        }
+      }
+    } catch (error) {
+      console.warn("Error accessing iframe document:", error);
+    }
+  });
+
+  return codeBlock;
+};
+
 export const extractLoggedInUserDetails = async () => {
-    const codeBlocks = document.querySelectorAll('code[id^="bpr-guid-"]');
+    const codeBlocks = getCodeBlock();
+    if(!codeBlocks){
+      return null;
+    }
+
     let userDetails: UserDetails;
     codeBlocks.forEach((codeBlock) => {
       try {
@@ -37,6 +79,7 @@ export const extractLoggedInUserDetails = async () => {
     }
 
     const cacheData = await DataStore.getUserData();
+
     if(cacheData.identifier === userDetails.identifier){
       return cacheData;
     }
