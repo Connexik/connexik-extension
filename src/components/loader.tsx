@@ -65,7 +65,7 @@ const Overlay = ({ message, visible, success, error }) => {
         ) : (
           <p style={styles.message}>{message}</p>
         )}
-        <p style={styles.convexikAI}>Convexik AI on Duty 🫡</p>
+        <p style={styles.connexikAI}>Connexik AI on Duty 🫡</p>
       </div>
     </div>,
     document.body
@@ -87,7 +87,7 @@ const styles = {
     color: "#fff",
     fontSize: "16px",
   },
-  convexikAI: {
+  connexikAI: {
     marginTop: "10px",
     color: "#fff",
     fontSize: "12px",

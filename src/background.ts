@@ -1,3 +1,31 @@
+import { INTER_EVENTS } from "~config";
+import localStore from "~datastore/local";
+
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+    if (request.action === INTER_EVENTS.GET_SESSION) {
+        const response = await localStore.getLinkedInUserData();
+        if (response.success) {
+            const user = response.data ? (Object.keys(response.data).length > 0 ? response.data : null) : null;
+            sendResponse({ success: true, user });
+        } else {
+            sendResponse({ success: false, error: "Unknown action" });
+        }
+    } else if (request.action === INTER_EVENTS.SET_SESSION) {
+        const response = await localStore.setLinkedInUserData(request.payload);
+        sendResponse(response);
+    } else if(request.action === INTER_EVENTS.OPEN_POPUP) {
+        chrome.windows.create({
+            url: chrome.runtime.getURL("popup.html"),
+            type: "popup",
+            width: 400,
+            height: 300
+          });
+    } else {
+        sendResponse({ success: false, error: "Unknown action" });
+    }
+    return true;
+});
+
 // chrome.runtime.onInstalled.addListener(() => {
 //   chrome.declarativeNetRequest.updateDynamicRules(
 //     {

@@ -7,12 +7,16 @@ import type {
 import { useEffect, useState } from "react"
 import { createRoot } from "react-dom/client"
 
-import type { ConnexikUser } from "~server/types/user.type"
+import { INTER_EVENTS, SESSION_STATUS } from "~config"
+import type { ConnexikUser, Session } from "~server/types/user.type"
+import { getSession, signInWithLinkedIn } from "~services/auth"
 import profileScraper from "~services/profile-scraper"
 import { extractLoggedInUserDetails } from "~services/user"
+import { wait } from "~utils/common"
 
 import DataStore from "../datastore/session"
-import { wait } from "~utils/common"
+
+import "../style.css"
 
 // Plasmo Content Script Configuration
 export const config: PlasmoCSConfig = {
@@ -34,13 +38,68 @@ const isOnProfile = (username: string) => {
   ])
 }
 
+const SVGIcon = ({
+  size = 12,
+  color = "currentColor",
+  className = "",
+  ...props
+}) => {
+  return (
+    <div
+      className={`inline-block ${className}`}
+      style={{ width: size, height: size }}
+      {...props}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        width={size}
+        height={size}
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        className="transition-colors duration-200">
+        {/* Circle background */}
+        <circle cx="12" cy="12" r="11" />
+
+        {/* "i" dot */}
+        <circle cx="12" cy="7" r="1.5" fill={color} stroke="none" />
+
+        {/* "i" stem */}
+        <rect
+          x="11"
+          y="10"
+          width="2"
+          height="8"
+          rx="1"
+          fill={color}
+          stroke="none"
+        />
+      </svg>
+    </div>
+  )
+}
+
 const TopBar = () => {
+  const [sessionData, setSessionData] = useState<Session>(null)
   const [loggedInUser, setLoggedInUser] = useState<ConnexikUser | null>(null)
   const [showTopBar, setShowTopBar] = useState<Boolean>(false)
+  const [isTooltipVisible, setTooltipVisible] = useState(false)
 
   const changeLoggedInUser = (val: ConnexikUser) => {
     setLoggedInUser(val)
   }
+
+  // Fetch session data on component mount
+  useEffect(() => {
+    const checkSession = async () => {
+      const session = await getSession()
+      if (session) {
+        setSessionData(session)
+      }
+    }
+
+    checkSession()
+  }, [])
 
   // Fetch logged-in user details on component mount
   useEffect(() => {
@@ -107,327 +166,417 @@ const TopBar = () => {
         )
       }
     } else if (feature === "grow") {
+      const matched = MicroMatch.isMatch(oldURL, ["*/mynetwork/grow*"])
+      if (!matched) {
+        window.open(`${window.location.origin}/mynetwork/grow`, "_self")
+      }
     } else if (feature === "referral") {
     }
   }
 
   const handleSetTopBar = () => {
+    if (!sessionData) {
+      chrome.runtime.sendMessage({ action: INTER_EVENTS.OPEN_POPUP })
+    }
     setShowTopBar(!showTopBar)
   }
 
   return (
-    loggedInUser && (
-      <div
-        id="connexik-profile-item"
+    <div
+      id="connexik-profile-item"
+      style={{
+        position: "absolute",
+        right: "1.2%",
+        fontFamily:
+          "-apple-system,system-ui,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Fira Sans,Ubuntu,Oxygen,Oxygen Sans,Cantarell,Droid Sans,Apple Color Emoji,Segoe UI Emoji,Segoe UI Emoji,Segoe UI Symbol,Lucida Grande,Helvetica,Arial,sans-serif"
+      }}>
+      <button
+        onClick={handleSetTopBar}
         style={{
+          border: 0,
+          background: "transparent",
+          paddingTop: "4%",
+          paddingBottom: "4%",
+          borderLeft: "1px solid rgb(140 140 140 / .2)",
+          padding: "4% 10%",
+          width: "max-content",
+          cursor: "pointer",
+          backgroundColor: !sessionData ? "#cd5c5c85" : "#ffffff00"
+        }}>
+        <img
+          style={{
+            width: "25px",
+            height: "30px",
+            minWidth: "15px",
+            marginRight: "15%",
+            marginBottom: "-5%"
+          }}
+          src={chrome.runtime.getURL(`assets/connexik-ai-no-bg.png`)}
+        />
+        <span
+          style={{
+            fontSize: "1.2rem",
+            color: "rgb(0 0 0 / .6)",
+            display: "flex",
+            alignItems: "center",
+            lineHeight: "1.33333",
+            fontFamily:
+              "-apple-system, system-ui, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Fira Sans, Ubuntu, Oxygen, Oxygen Sans, Cantarell, Droid Sans, Apple Color Emoji, Segoe UI Emoji, Segoe UI Emoji, Segoe UI Symbol, Lucida Grande, Helvetica, Arial, sans-serif"
+          }}
+          title="Connexik AI">
+          Connexik AI
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            aria-hidden="true"
+            data-supported-dps="16x16"
+            viewBox="0 0 16 16"
+            data-token-id="379"
+            width="16"
+            height="16"
+            style={{
+              width: "16px",
+              minWidth: "16px",
+              height: "16px",
+              minHeight: "16px"
+            }}>
+            <path d="M8 11 3 6h10Z"></path>
+          </svg>
+        </span>
+      </button>
+      <div
+        id="connexik-ai-dropdown"
+        style={{
+          maxWidth: "300px",
+          display: showTopBar ? "inherit" : "none",
           position: "absolute",
+          inset: "calc(100% + 8px) 0px auto auto",
+          maxHeight: "calc(-64px + 100vh)",
+          overflowY: "auto",
+          transition:
+            "visibility 25ms linear, z-index 25ms linear, opacity 334ms cubic-bezier(0, 0, 0.2, 1), 25ms",
+          zIndex: "999",
+          width: "max-content",
+          color: "black",
+          borderRadius: "0.8rem 0 0.8rem 0.8rem",
+          backgroundColor: "#fff",
+          boxShadow:
+            "rgba(140, 140, 140, 0.2) 0px 0px 0px 1px, rgba(0, 0, 0, 0.3) 0px 4px 4px",
           right: 0,
           fontFamily:
             "-apple-system,system-ui,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Fira Sans,Ubuntu,Oxygen,Oxygen Sans,Cantarell,Droid Sans,Apple Color Emoji,Segoe UI Emoji,Segoe UI Emoji,Segoe UI Symbol,Lucida Grande,Helvetica,Arial,sans-serif"
         }}>
-        <button
-          onClick={handleSetTopBar}
-          style={{
-            border: 0,
-            background: "transparent",
-            paddingTop: "4%",
-            paddingBottom: "4%",
-            borderLeft: "1px solid rgb(140 140 140 / .2)",
-            padding: "4% 10%",
-            width: "max-content",
-            cursor: "pointer",
-            marginRight: "15px"
-          }}>
-          <img
-            style={{
-              width: "25px",
-              height: "30px",
-              minWidth: "15px",
-              marginRight: "15%",
-              marginBottom: "-5%"
-            }}
-            src={chrome.runtime.getURL(`assets/connexik-ai-no-bg.png`)}
-          />
-          <span
-            style={{
-              fontSize: "1.2rem",
-              color: "rgb(0 0 0 / .6)",
-              display: "flex",
-              alignItems: "center",
-              lineHeight: "1.33333",
-              fontFamily:
-                "-apple-system, system-ui, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Fira Sans, Ubuntu, Oxygen, Oxygen Sans, Cantarell, Droid Sans, Apple Color Emoji, Segoe UI Emoji, Segoe UI Emoji, Segoe UI Symbol, Lucida Grande, Helvetica, Arial, sans-serif"
-            }}
-            title="Connexik AI">
-            Connexik AI
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              aria-hidden="true"
-              data-supported-dps="16x16"
-              viewBox="0 0 16 16"
-              data-token-id="379"
-              width="16"
-              height="16"
-              style={{
-                width: "16px",
-                minWidth: "16px",
-                height: "16px",
-                minHeight: "16px"
-              }}>
-              <path d="M8 11 3 6h10Z"></path>
-            </svg>
-          </span>
-        </button>
         <div
-          id="connexik-ai-dropdown"
           style={{
-            maxWidth: "300px",
-            display: showTopBar ? "inherit" : "none",
-            position: "absolute",
-            inset: "calc(100% + 8px) 0px auto auto",
-            maxHeight: "calc(-64px + 100vh)",
-            overflowY: "auto",
             transition:
-              "visibility 25ms linear, z-index 25ms linear, opacity 334ms cubic-bezier(0, 0, 0.2, 1), 25ms",
-            zIndex: "999",
-            width: "max-content",
-            color: "black",
-            borderRadius: "0.8rem 0 0.8rem 0.8rem",
-            backgroundColor: "#fff",
-            boxShadow:
-              "rgba(140, 140, 140, 0.2) 0px 0px 0px 1px, rgba(0, 0, 0, 0.3) 0px 4px 4px",
-            right: 0,
-            fontFamily:
-              "-apple-system,system-ui,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Fira Sans,Ubuntu,Oxygen,Oxygen Sans,Cantarell,Droid Sans,Apple Color Emoji,Segoe UI Emoji,Segoe UI Emoji,Segoe UI Symbol,Lucida Grande,Helvetica,Arial,sans-serif"
+              "visibility 0s linear 25ms, z-index 0s linear 25ms, opacity 334ms cubic-bezier(0,0,.2,1), 25ms",
+            width: "100%"
           }}>
-          <div
-            style={{
-              transition:
-                "visibility 0s linear 25ms, z-index 0s linear 25ms, opacity 334ms cubic-bezier(0,0,.2,1), 25ms",
-              width: "100%"
-            }}>
-            <header style={{ padding: ".8rem", display: "block" }}>
-              <div style={{ display: "flex" }}>
-                <div style={{ position: "relative", flexShrink: 0 }}>
-                  <img
-                    style={{
-                      borderRadius: "50%",
-                      backgroundColor: "#fff",
-                      color: "rgb(0 0 0/.9)",
-                      border: "none",
-                      boxShadow: "none",
-                      position: "relative",
-                      width: "56px",
-                      height: "56px",
-                      boxSizing: "border-box",
-                      backgroundClip: "content-box",
-                      maxHeight: "100%",
-                      maxWidth: "100%",
-                      verticalAlign: "bottom",
-                      overflow: "hidden",
-                      transform: "scale(1)",
-                      transition: "transform .2s ease-in-out",
-                      minWidth: "24px"
-                    }}
-                    width="70"
-                    height="70"
-                    src={loggedInUser?.profileUrl}
-                  />
-                </div>
-                <div style={{ paddingLeft: "0.8rem", alignSelf: "center" }}>
-                  <div
-                    style={{
-                      fontWeight: "600",
-                      fontSize: "1.6rem",
-                      lineHeight: 1.5,
-                      display: "inline",
-                      color: "rgb(0 0 0/.9)"
-                    }}>
-                    {loggedInUser?.firstName} {loggedInUser?.lastName}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "1.4rem",
-                      lineHeight: "1.42857",
-                      color: "rgb(0 0 0/.9)",
-                      fontWeight: "400",
-                      display: "block"
-                    }}>
-                    {loggedInUser?.title}
-                  </div>
-                </div>
+          {sessionData?.status !== SESSION_STATUS.ACTIVE ? (
+            !sessionData ? (
+              <div style={{ textAlign: "center", padding: "10px" }}>
+                <h3>Sign in with LinkedIn to get started</h3>
               </div>
-              <div
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  marginTop: ".8rem"
-                }}>
-                <a
-                  onClick={scanProfile}
-                  style={{
-                    background: "transparent",
-                    margin: 0,
-                    fontSize: "1.4rem",
-                    minHeight: "2.4rem",
-                    padding: ".2rem .8rem",
-                    lineHeight: "2rem",
-                    transitionTimingFunction: "cubic-bezier(.4,0,.2,1)",
-                    alignItems: "center",
-                    border: "none",
-                    boxSizing: "border-box",
-                    cursor: "pointer",
-                    fontWeight: "600",
-                    maxWidth: "480px",
-                    overflow: "hidden",
-                    textAlign: "center",
-                    transitionProperty: "background-color,box-shadow,color",
-                    verticalAlign: "middle",
-                    backgroundColor: "transparent",
-                    color: "#0a66c2",
-                    boxShadow: "inset 0 0 0 1px #0a66c2",
-                    textDecoration: "none",
-                    width: "100%",
-                    borderRadius: "1.6rem",
-                    paddingLeft: "1.2rem",
-                    paddingRight: "1.2rem",
-                    minWidth: 0
-                  }}>
-                  {loggedInUser?.isScanned
-                    ? "Rescan Profile"
-                    : "Scan My Profile"}
-                </a>
-              </div>
-            </header>
-            <ul
-              style={{
-                maxHeight: "none",
-                listStyleType: "none",
-                listStyle: "none",
-                padding: "0",
-                margin: 0
-              }}>
-              <li
-                style={{
-                  padding: "0 2px"
-                }}>
-                <h3
-                  style={{
-                    backgroundColor: "hsla(0,0%,100%,0)",
-                    borderTop: "1px solid rgb(140 140 140/.2)",
-                    fontSize: "1.6rem",
-                    display: "block",
-                    lineHeight: "2rem",
-                    fontWeight: "600",
-                    padding: "1.2rem 1.2rem 0",
-                    textTransform: "none",
-                    margin: 0
-                  }}>
-                  Features
+            ) : (
+              <div style={{ textAlign: "center", padding: "5px 8px" }}>
+                <h3>
+                  Welcome {sessionData.firstName} {sessionData.lastName}!
                 </h3>
+                <h3 style={{ marginBottom: "16px", marginTop: "16px" }}>
+                  {sessionData.status === SESSION_STATUS.QUEUED
+                    ? "You're still in queue for access. For early access, ping us at "
+                    : "You're blocked for access. For access, ping us at "}
+                  <a
+                    href="mailto:theconnexik@gmail.com"
+                    style={{ color: "#0073b1" }}>
+                    theconnexik@gmail.com
+                  </a>
+                </h3>
+              </div>
+            )
+          ) : (
+            loggedInUser && (
+              <div>
+                <header style={{ padding: ".8rem", display: "block" }}>
+                  <div style={{ display: "flex" }}>
+                    <div style={{ position: "relative", flexShrink: 0 }}>
+                      <img
+                        style={{
+                          borderRadius: "50%",
+                          backgroundColor: "#fff",
+                          color: "rgb(0 0 0/.9)",
+                          border: "none",
+                          boxShadow: "none",
+                          position: "relative",
+                          width: "56px",
+                          height: "56px",
+                          boxSizing: "border-box",
+                          backgroundClip: "content-box",
+                          maxHeight: "100%",
+                          maxWidth: "100%",
+                          verticalAlign: "bottom",
+                          overflow: "hidden",
+                          transform: "scale(1)",
+                          transition: "transform .2s ease-in-out",
+                          minWidth: "24px"
+                        }}
+                        width="70"
+                        height="70"
+                        src={loggedInUser?.profileUrl}
+                      />
+                    </div>
+                    <div style={{ paddingLeft: "0.8rem", alignSelf: "center" }}>
+                      <div
+                        style={{
+                          fontWeight: "600",
+                          fontSize: "1.6rem",
+                          lineHeight: 1.5,
+                          display: "inline",
+                          color: "rgb(0 0 0/.9)"
+                        }}>
+                        {loggedInUser?.firstName} {loggedInUser?.lastName}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "1.4rem",
+                          lineHeight: "1.42857",
+                          color: "rgb(0 0 0/.9)",
+                          fontWeight: "400",
+                          display: "block"
+                        }}>
+                        {loggedInUser?.title}
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      marginTop: ".8rem"
+                    }}>
+                    <a
+                      className="connexik-top-bar-button"
+                      onClick={scanProfile}>
+                      {loggedInUser?.isScanned
+                        ? "Rescan Profile"
+                        : "Scan My Profile"}
+                    </a>
+                  </div>
+                </header>
                 <ul
                   style={{
                     maxHeight: "none",
                     listStyleType: "none",
-                    marginTop: "0.4rem",
-                    marginBottom: "0.4rem",
                     listStyle: "none",
-                    padding: 0
+                    padding: "0",
+                    margin: 0
                   }}>
-                  <li style={{ padding: "0 2px" }}>
-                    <button
+                  <li
+                    style={{
+                      padding: "0 2px"
+                    }}>
+                    <h3
                       style={{
-                        width: "100%",
-                        alignItems: "center",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        paddingRight: "0.4rem",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        fontSize: "1.4rem",
-                        fontWeight: "400",
+                        backgroundColor: "hsla(0,0%,100%,0)",
+                        borderTop: "1px solid rgb(140 140 140/.2)",
+                        fontSize: "1.6rem",
+                        display: "block",
                         lineHeight: "2rem",
-                        padding: "0.4rem 1.2rem",
-                        color: "rgb(0 0 0/.6)",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        marginBottom: 0
-                      }}
-                      onClick={() => goToFeatures("accept")}
-                      type="button">
-                      Accept My Connections
-                    </button>
-                  </li>
-                  <li style={{ padding: "0 2px" }}>
-                    <button
+                        fontWeight: "600",
+                        padding: "1.2rem 1.2rem 0",
+                        textTransform: "none",
+                        margin: 0
+                      }}>
+                      Features
+                    </h3>
+                    <style>
+                      {`
+                        .connexik-top-bar-list li button:hover{ 
+                          text-decoration: underline; 
+                        }
+                          
+                        .connexik-top-bar-button {
+                          background: transparent;
+                          margin: 0;
+                          font-size: 1.4rem;
+                          min-height: 2.4rem;
+                          padding: 0.2rem 0.8rem;
+                          line-height: 2rem;
+                          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+                          align-items: center;
+                          border: none;
+                          box-sizing: border-box;
+                          cursor: pointer;
+                          font-weight: 600;
+                          max-width: 480px;
+                          overflow: hidden;
+                          text-align: center;
+                          transition-property: background-color, box-shadow, color;
+                          vertical-align: middle;
+                          background-color: transparent;
+                          color: #0a66c2;
+                          box-shadow: inset 0 0 0 1px #0a66c2;
+                          text-decoration: none;
+                          width: 100%;
+                          border-radius: 1.6rem;
+                          padding-left: 1.2rem;
+                          padding-right: 1.2rem;
+                          min-width: 0;
+                        }
+
+                        .connexik-top-bar-button:hover {
+                          background-color: #0b66c224;
+                        }
+                      `}
+                    </style>
+                    <ul
                       style={{
-                        width: "100%",
-                        alignItems: "center",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        paddingRight: "0.4rem",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        fontSize: "1.4rem",
-                        fontWeight: "400",
-                        lineHeight: "2rem",
-                        padding: "0.4rem 1.2rem",
-                        color: "rgb(0 0 0/.6)",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        marginBottom: 0
+                        maxHeight: "none",
+                        listStyleType: "none",
+                        marginTop: "0.4rem",
+                        marginBottom: "0.4rem",
+                        listStyle: "none",
+                        padding: 0
                       }}
-                      onClick={() => goToFeatures("grow")}
-                      type="button">
-                      Grow My Network
-                    </button>
-                  </li>
-                  <li style={{ padding: "0 2px" }}>
-                    <button
-                      style={{
-                        width: "100%",
-                        alignItems: "center",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        paddingRight: "0.4rem",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        fontSize: "1.4rem",
-                        fontWeight: "400",
-                        lineHeight: "2rem",
-                        padding: "0.4rem 1.2rem",
-                        color: "rgb(0 0 0/.6)",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        marginBottom: 0
-                      }}
-                      onClick={() => goToFeatures("referral")}
-                      type="button">
-                      Referral Wizard
-                    </button>
+                      className="connexik-top-bar-list">
+                      <li style={{ padding: "0 2px" }}>
+                        <button
+                          style={{
+                            width: "100%",
+                            alignItems: "center",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            paddingRight: "0.4rem",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            fontSize: "1.4rem",
+                            fontWeight: "400",
+                            lineHeight: "2rem",
+                            padding: "0.4rem 1.2rem",
+                            color: "rgb(0 0 0/.6)",
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            marginBottom: 0
+                          }}
+                          onClick={() => goToFeatures("accept")}
+                          type="button">
+                          Accept My Connections
+                        </button>
+                      </li>
+                      <li style={{ padding: "0 2px" }}>
+                        <button
+                          style={{
+                            width: "100%",
+                            alignItems: "center",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            paddingRight: "0.4rem",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            fontSize: "1.4rem",
+                            fontWeight: "400",
+                            lineHeight: "2rem",
+                            padding: "0.4rem 1.2rem",
+                            color: "rgb(0 0 0/.6)",
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            marginBottom: 0
+                          }}
+                          onClick={() => goToFeatures("grow")}
+                          type="button">
+                          Grow My Network
+                        </button>
+                      </li>
+                      <li style={{ padding: "0 2px" }}>
+                        <button
+                          style={{
+                            width: "100%",
+                            alignItems: "center",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            paddingRight: "0.4rem",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            fontSize: "1.4rem",
+                            fontWeight: "400",
+                            lineHeight: "2rem",
+                            padding: "0.4rem 1.2rem",
+                            color: "rgb(0 0 0/.6)",
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            marginBottom: 0
+                          }}
+                          onMouseEnter={() => setTooltipVisible(true)}
+                          onMouseLeave={() => setTooltipVisible(false)}
+                          // onClick={() => goToFeatures("referral")}
+                          type="button">
+                          Referral Wizard
+                          <span
+                            style={{
+                              marginRight: "auto",
+                              marginLeft: "0.5rem",
+                              marginTop: "-0.5rem",
+                              display: "inline-block",
+                              position: "relative",
+                              cursor: "pointer"
+                            }}
+                            className="connexik-info-icon"
+                            onMouseEnter={() => setTooltipVisible(true)}
+                            onMouseLeave={() => setTooltipVisible(false)}>
+                            <SVGIcon />
+                            {isTooltipVisible && (
+                              <span
+                                style={{
+                                  position: "fixed",
+                                  top: "30%",
+                                  right: "-5%",
+                                  transform: "translateX(-50%)",
+                                  marginBottom: "0.5rem",
+                                  background: "#fff",
+                                  color: "#000",
+                                  padding: "0.5rem 1rem",
+                                  borderRadius: "4px",
+                                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                  fontSize: "1.2rem",
+                                  lineHeight: "1.4rem",
+                                  whiteSpace: "normal",
+                                  width: "220px",
+                                  textAlign: "center",
+                                  zIndex: "1000"
+                                }}
+                                className="tooltip">
+                                <strong>Coming Soon</strong>
+                                <br />
+                                You will be able to get referrals from the
+                                company's employees you're applying for.
+                              </span>
+                            )}
+                          </span>
+                        </button>
+                      </li>
+                    </ul>
                   </li>
                 </ul>
-              </li>
-            </ul>
-            <div
-              style={{
-                fontSize: "1rem",
-                padding: "0.8rem",
-                textAlign: "center"
-              }}>
-              Made with ❤️ by Connexik
-            </div>
+              </div>
+            )
+          )}
+          <div
+            style={{
+              fontSize: "1rem",
+              padding: "0.8rem",
+              textAlign: "center"
+            }}>
+            Made with ❤️ by Connexik
           </div>
         </div>
       </div>
-    )
+    </div>
   )
 }
 
@@ -495,10 +644,10 @@ export const render: PlasmoRender<PlasmoCSUIJSXContainer> = async ({
   anchor,
   createRootContainer
 }) => {
-  const globalListItems = await waitForElement();
+  const globalListItems = await waitForElement()
 
   if (!globalListItems) {
-    await wait(3);
+    await wait(3)
   }
 
   const rootContainer = await createRootContainer(anchor)

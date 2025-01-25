@@ -20,3 +20,11 @@ export type ConnexikUser = {
     profileUrl: string,
     rescanTs: number
 }
+
+export type Session = {
+    token: string,
+    status: string,
+    firstName: string,
+    lastName: string,
+    lastLoginTs: number
+}

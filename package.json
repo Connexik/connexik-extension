@@ -17,6 +17,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "chokidar": "^4.0.3",
+    "jwt-decode": "^4.0.0",
     "micromatch": "^4.0.8",
     "plasmo": "0.89.4",
     "react": "18.2.0",
@@ -45,7 +46,7 @@
     "web_accessible_resources": [
       {
         "resources": [
-          "assets/connexik-*.png"
+          "assets/*"
         ],
         "matches": [
           "*://linkedin.com/*",

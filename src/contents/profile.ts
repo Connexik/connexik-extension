@@ -1,6 +1,7 @@
 import type {
   PlasmoCSConfig,
 } from "plasmo";
+import { activeSession } from "~services/auth";
 import profileScraper from "~services/profile-scraper";
 
 // Plasmo Content Script Configuration
@@ -9,8 +10,12 @@ export const config: PlasmoCSConfig = {
   all_frames: true,
   run_at: "document_idle", // Ensures script runs after the DOM is fully loaded
 };
-
 setTimeout(async () => {
+  const session = await activeSession();
+  if (!session) {
+    return;
+  }
+  
   const urlObj = window.location
   const params = new URLSearchParams(urlObj.search);
   const redirectExists = params.get("connexik-redirect");

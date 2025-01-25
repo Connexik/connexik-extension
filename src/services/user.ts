@@ -80,7 +80,7 @@ export const extractLoggedInUserDetails = async () => {
 
     const cacheData = await DataStore.getUserData();
 
-    if(cacheData.identifier === userDetails.identifier){
+    if(cacheData?.identifier === userDetails.identifier){
       return cacheData;
     }
 

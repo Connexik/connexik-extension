@@ -14,19 +14,57 @@
   width: 100%;
 }
 
+/* TopBar.css */
+.connexik-top-bar-list li button:hover {
+  text-decoration: underline;
+}
+
+.connexik-top-bar-button {
+  background: transparent;
+  margin: 0;
+  font-size: 1.4rem;
+  min-height: 2.4rem;
+  padding: 0.2rem 0.8rem;
+  line-height: 2rem;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  align-items: center;
+  border: none;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-weight: 600;
+  max-width: 480px;
+  overflow: hidden;
+  text-align: center;
+  transition-property: background-color, box-shadow, color;
+  vertical-align: middle;
+  background-color: transparent;
+  color: #0a66c2;
+  box-shadow: inset 0 0 0 1px #0a66c2;
+  text-decoration: none;
+  width: 100%;
+  border-radius: 1.6rem;
+  padding-left: 1.2rem;
+  padding-right: 1.2rem;
+  min-width: 0;
+}
+
+.connexik-top-bar-button:hover {
+  background-color: #0b66c224;
+}
+
 /* NetworkGrow.css */
 
-#connexik-grow-section{
+#connexik-grow-section {
   padding-block-end: 1.6rem;
   isolation: isolate;
-  box-shadow: 0px 0px 0px 1px rgb(140 140 140 / .2);
-  background-color: #FFFFFF;
+  box-shadow: 0px 0px 0px 1px rgb(140 140 140 / 0.2);
+  background-color: #ffffff;
   overflow: hidden;
-  border-radius: .8rem;
+  border-radius: 0.8rem;
   display: block;
 }
 
-.network-grow-container{
+.network-grow-container {
   justify-content: flex-start;
   gap: 0;
   flex-wrap: nowrap;
@@ -35,7 +73,7 @@
   align-items: stretch;
 }
 
-.network-grow-heading{
+.network-grow-heading {
   white-space: pre-wrap;
   font-size: 1.6rem;
   text-align: start;
@@ -45,21 +83,21 @@
   padding-inline-start: 2.4rem;
   padding-block-end: 1.6rem;
   padding-block-start: 1.6rem;
-  color: rgb(0 0 0 / .9);
+  color: rgb(0 0 0 / 0.9);
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  border-bottom: 1px solid rgb(140 140 140 / .2);
+  border-bottom: 1px solid rgb(140 140 140 / 0.2);
 }
 
-.heading-text{
+.heading-text {
   font-size: 1.5rem;
   margin-right: auto;
 }
 
-.collapse-button{
-  background: none; 
+.collapse-button {
+  background: none;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
@@ -67,37 +105,184 @@
 }
 
 .collapse-button:focus {
-  outline: none; 
-  box-shadow: 0 0 0 2px #007BFF;
+  outline: none;
+  box-shadow: 0 0 0 2px #007bff;
 }
 
 .network-grow-heading[aria-expanded="true"] .collapse-button {
-  transform: rotate(180deg); 
+  transform: rotate(180deg);
 }
 
-.network-types-list{
+.network-types-list {
   padding: 4% 0 0 6%;
 }
 
-.network-type-item{
+.network-type-item {
   white-space: white-space;
   font-size: 1.5rem;
   line-height: 1.5;
   font-weight: 400;
-  color: rgb(0 0 0 / .6);
+  color: rgb(0 0 0 / 0.6);
   margin-bottom: 0.5rem;
 }
 
-.network-type-item>a{
+.network-type-item > a {
   font-weight: 400;
-  color: rgb(0 0 0 / .6);
+  color: rgb(0 0 0 / 0.6);
 }
 
-.network-type-item>a>span:hover{
+.network-type-item > a > span:hover {
   text-decoration: underline;
   font-weight: 600;
 }
 
-h2>.connexik-pymk-show{
-  margin-left: auto
+h2 > .connexik-pymk-show {
+  margin-left: auto;
+}
+
+/* Confirmation.css */
+.connexik-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999; /* Ensure it's above other elements */
+}
+
+.connexik-modal-container {
+  background: white;
+  width: 50%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  padding: 0;
+  font-family: inherit;
+}
+
+.connexik-modal-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.connexik-modal-header {
+  font-size: 20px;
+  font-weight: bold;
+  padding: 3%;
+  border-bottom: 1px solid rgb(140 140 140/0.2);
+}
+
+.connexik-modal-body {
+  font-size: 14px;
+  color: #333;
+  text-align: left;
+  margin: 2%;
+}
+
+.connexik-modal-body .connexik-highlight {
+  font-weight: bold;
+  color: #0078c1; /* Blue color for "Connexik AI" */
+}
+
+/* Footer Buttons */
+.connexik-modal-footer {
+  display: flex;
+  justify-content: space-evenly;
+  margin-bottom: 15px;
+}
+
+.connexik-btn-primary {
+  background-color: #0078c1; /* Blue button */
+  color: white;
+  border: none;
+  border-radius: 1.6rem;
+  padding-left: 1.6rem !important;
+  padding-right: 1.6rem !important;
+  padding-bottom: 0.8rem !important;
+  padding-top: 0.8rem !important;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.connexik-btn-primary:hover {
+  background-color: #005f99;
+}
+
+.connexik-btn-primary:disabled,
+.connexik-btn-secondary:disabled,
+.connexik-btn-ternary:disabled {
+  color: #999; /* Gray text */
+  cursor: not-allowed; /* Show a not-allowed cursor */
+  opacity: 0.6; /* Slightly transparent */
+}
+
+.connexik-btn-secondary {
+  background-color: #007a3d;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 1.6rem;
+  padding-left: 1.6rem !important;
+  padding-right: 1.6rem !important;
+  padding-bottom: 0.8rem !important;
+  padding-top: 0.8rem !important;
+}
+
+.connexik-btn-secondary:hover {
+  background-color: #005f2d;
+}
+
+.connexik-btn-ternary {
+  background-color: #ebebeb;
+  color: black;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 1.6rem;
+  padding-left: 1.6rem !important;
+  padding-right: 1.6rem !important;
+  padding-bottom: 0.8rem !important;
+  padding-top: 0.8rem !important;
+}
+
+.connexik-btn-ternary:hover {
+  background-color: #dbdbdb;
+}
+
+.connexik-modal-footer-note {
+  font-size: 12px;
+  text-align: center;
+  color: #555;
+  padding: 2%;
+  border-top: 1px solid rgb(140 140 140/0.2);
+}
+
+.connexik-spinner {
+  width: 50px;
+  height: 50px;
+  margin: auto;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

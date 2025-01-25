@@ -12,8 +12,9 @@ import { createRoot } from "react-dom/client"
 
 import "../style.css"
 
-import { capitalizeFirstLetter } from "~utils/common"
 import { processGrowNetwork } from "~services/grow-network"
+import { capitalizeFirstLetter } from "~utils/common"
+import { activeSession } from "~services/auth"
 
 export const config: PlasmoCSConfig = {
   matches: ["*://linkedin.com/*", "*://www.linkedin.com/*"],
@@ -44,13 +45,13 @@ const OpenAccept: React.FC<{
   return (
     <span css={hoverAnchorStyle}>
       <span style={{ whiteSpace: "pre-wrap", fontSize: "1.6rem" }}>
-        {labelText} Convexik AI ❤️
+        {labelText} Connexik AI ❤️
       </span>
     </span>
   )
 }
 
-const dialogOpenProcess = (pymk) => {
+const dialogOpenProcess = (filter) => {
   const intervalDialogOpenId = setInterval(() => {
     const dialogElement = document.querySelector("dialog[open]")
     if (!dialogElement) {
@@ -58,11 +59,11 @@ const dialogOpenProcess = (pymk) => {
     }
     clearInterval(intervalDialogOpenId)
 
-    processGrowNetwork(dialogElement)
+    processGrowNetwork(dialogElement, filter)
   }, 1000)
 }
 
-const moreSuggestionsProcess = () => {
+const moreSuggestionsProcess = (filter) => {
   const targetElement = document.querySelector(
     '[data-view-name="cohorts-section-more-suggestions"]>section'
   )
@@ -75,15 +76,15 @@ const moreSuggestionsProcess = () => {
       inline: "nearest" // For horizontal scrolling (if applicable)
     })
 
-    processGrowNetwork(targetElement)
+    processGrowNetwork(targetElement, filter)
   }
 }
 
 const processGrow = (pymk) => {
   if (pymk.button) {
-    dialogOpenProcess(pymk)
+    dialogOpenProcess(pymk.text)
   } else {
-    moreSuggestionsProcess()
+    moreSuggestionsProcess(pymk.text)
   }
 }
 
@@ -224,8 +225,8 @@ const NetworkGrow: React.FC = () => {
 
     if (pymk.button) {
       pymk.button.click()
-      processGrow(pymk)
     }
+    processGrow(pymk)
   }
 
   return (
@@ -295,9 +296,9 @@ const networkGrowController = () => {
   const intervalId = setInterval(() => {
     const targetElement = document.querySelector(
       '[href^="https://www.linkedin.com/mynetwork/invitation-manager"],' +
-        '[href^="http://www.linkedin.com/mynetwork/invitation-manager"],' +
-        '[href^="https://linkedin.com/mynetwork/invitation-manager"],' +
-        '[href^="http://linkedin.com/mynetwork/invitation-manager"]'
+      '[href^="http://www.linkedin.com/mynetwork/invitation-manager"],' +
+      '[href^="https://linkedin.com/mynetwork/invitation-manager"],' +
+      '[href^="http://linkedin.com/mynetwork/invitation-manager"]'
     ) as HTMLAnchorElement
 
     if (targetElement) {
@@ -368,6 +369,11 @@ const networkGrowController = () => {
 }
 
 export const render: PlasmoRender<PlasmoCSUIJSXContainer> = async () => {
+  const session = await activeSession();
+  if (!session) {
+    return;
+  }
+
   let oldURL = window.location.pathname
 
   const observer = new MutationObserver(() => {

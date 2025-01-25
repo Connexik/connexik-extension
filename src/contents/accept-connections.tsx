@@ -7,7 +7,11 @@ import React, { useEffect, useState } from "react"
 import { createRoot } from "react-dom/client"
 
 import type { ConnexikUser } from "~server/types/user.type"
-import { acceptFilterConnections } from "~services/accept-connection"
+import {
+  acceptAllConnections,
+  acceptFilterConnections
+} from "~services/accept-connection"
+import { activeSession } from "~services/auth"
 import { extractLoggedInUserDetails } from "~services/user"
 
 // Plasmo Content Script Configuration
@@ -54,7 +58,7 @@ const AcceptConnections: React.FC = () => {
   }
 
   const applyFilters = async () => {
-    if (!loggedInUser?.isScanned) {
+    if (loggedInUser?.isScanned) {
       setModalOpen(true)
       return
     }
@@ -65,8 +69,8 @@ const AcceptConnections: React.FC = () => {
     setModalOpen(false)
   }
 
-  const acceptAll = () => {
-    console.log("Accept All clicked!")
+  const acceptAll = async () => {
+    await acceptAllConnections(loggedInUser.connexikId)
   }
 
   return (
@@ -95,9 +99,9 @@ const AcceptConnections: React.FC = () => {
                 fontSize: "small",
                 lineHeight: "normal"
               }}>
-              <span style={{ display: "block" }}>Convexik AI Decision</span>
+              <span style={{ display: "block" }}>Connexik AI Decision</span>
               <span style={{ fontSize: "smaller", fontStyle: "italic" }}>
-                (Let Convexik AI decide for you)
+                (Let Connexik AI decide for you)
               </span>
             </div>
           </label>
@@ -291,10 +295,10 @@ const AcceptConnections: React.FC = () => {
                   <p
                     className="text-body-medium-bold pb2"
                     style={{ color: "var(--color-label)" }}>
-                    You need to scan your LinkedIn profile first to use{" "}
+                    You need to scan your LinkedIn profile first to use
                     <span style={{ fontWeight: "bolder", color: "#0078c1" }}>
                       Connexik AI
-                    </span>{" "}
+                    </span>
                     filters efficiently
                   </p>
                   <p
@@ -378,7 +382,12 @@ const waitForAsideElement = (): Promise<Element> => {
   })
 }
 
-export const render: PlasmoRender<PlasmoCSUIJSXContainer> = async () => {
+export const render: PlasmoRender<PlasmoCSUIJSXContainer> = async () => { 
+  const session = await activeSession();
+  if (!session) {
+    return;
+  }
+
   const rightSidebar = await waitForAsideElement()
   if (rightSidebar) {
     const filterContainer = document.createElement("div")

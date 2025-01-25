@@ -8,7 +8,7 @@ const wait = (time: number) =>
   new Promise((res) => setTimeout(res, time * 1000))
 
 const processor = async (redirectUrl: string) => {
-  OverlayManager.show("Convexik AI is now analysing the profile...")
+  OverlayManager.show("Connexik AI is now analysing the profile...")
   await wait(2);
 
   const userDetails: ConnexikUser = await extractLoggedInUserDetails()

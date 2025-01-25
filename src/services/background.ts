@@ -1,1 +1,1 @@
-export { signInWithLinkedIn, getSession } from "../backgrounda/auth";
+export { signInWithLinkedIn, getSession } from "./auth";
