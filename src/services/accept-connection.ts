@@ -140,10 +140,12 @@ export const acceptFilterConnections = async (connexikId, filters) => {
     `🎉 Connexik AI just worked its magic on ${responseData.relevantUsers.length} invitations!`,
     responseData.remainingFilterationCount
       ? `✨ Great news! You can process ${responseData.remainingFilterationCount} more invitations today. Keep going! 🚀`
-      : `😴 Uh-oh! You've hit today's filter limit. Recharge and come back tomorrow for more fun! 🌟`
+      : `😴 After this, you've hit today's filter limit. Recharge and come back tomorrow for more fun! 🌟`
   ]
 
   OverlayManager.showMultiple([...basicMessage])
+
+  console.log('responseData - ', responseData);
 
   for (let relevantUser of responseData.relevantUsers) {
     const fullName = invitationRef[relevantUser.username].name
@@ -152,11 +154,11 @@ export const acceptFilterConnections = async (connexikId, filters) => {
 
     const statusMessage = () => {
       if (status === "accept") {
-        // buttons.accept.click();
+        buttons.accept.click();
         return `✅ ConnexikAI has graciously accepted ${fullName}'s invitation because: "${relevantUser.reason}" Cheers to good reasoning! 🎉`
       } else if (status === "ignore") {
         if (filters.ignore) {
-          // buttons.ignore.click();
+          buttons.ignore.click();
           return `❌ ConnexikAI has decided to reject ${fullName}'s invitation due to: "${relevantUser.reason}" Sometimes tough choices must be made. 💔`
         } else {
           return `⏭️ ConnexikAI skipped ${fullName}'s invitation due to: "${relevantUser.reason}" On to the next one! 🚀`
@@ -169,7 +171,6 @@ export const acceptFilterConnections = async (connexikId, filters) => {
     OverlayManager.showMultiple([...basicMessage, statusMessage()])
 
     await wait(2)
-    break
   }
 
   OverlayManager.showSuccess(
@@ -200,10 +201,10 @@ export const acceptAllConnections = async (connexikId) => {
 
      await wait(1)
 
-     const message = `Accepting request - ${userRef.fullName}`
-     // buttons.accept.click();
-
+     const message = `Accepting request - ${userRef.name}`
      OverlayManager.showMultiple([...basicMessage, message])
+
+     userRef.buttons.accept.click();
   }
 
   OverlayManager.showSuccess(

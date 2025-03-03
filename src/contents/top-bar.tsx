@@ -185,7 +185,7 @@ const TopBar = () => {
     <div
       id="connexik-profile-item"
       style={{
-        position: "absolute",
+        position: "fixed",
         right: "1.2%",
         fontFamily:
           "-apple-system,system-ui,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Fira Sans,Ubuntu,Oxygen,Oxygen Sans,Cantarell,Droid Sans,Apple Color Emoji,Segoe UI Emoji,Segoe UI Emoji,Segoe UI Symbol,Lucida Grande,Helvetica,Arial,sans-serif"
@@ -394,7 +394,7 @@ const TopBar = () => {
                         .connexik-top-bar-list li button:hover{ 
                           text-decoration: underline; 
                         }
-                          
+
                         .connexik-top-bar-button {
                           background: transparent;
                           margin: 0;

@@ -17,7 +17,8 @@ const acceptFilter = async (
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.token}`
         },
         body: JSON.stringify({ connexikId, pendingInvitations, filters })
       }

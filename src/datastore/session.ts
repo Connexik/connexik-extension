@@ -26,8 +26,15 @@ const getUserData = (): Promise<ConnexikUser> => {
     );
 }
 
+const clearUserData = (): Promise<{success: boolean}> => {
+    return new Promise((resolve, reject) => 
+        chrome.storage.local.remove(`${keyPrefix}:linkedin:user`).then(() => resolve({success: true})).catch((e: Error) => { reject({success: false, error: e}) })
+    );
+}
+
 export default {
     registerChangeUserData,
     setUserData,
     getUserData,
+    clearUserData,
 }

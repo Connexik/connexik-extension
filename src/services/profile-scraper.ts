@@ -3,6 +3,7 @@ import type { ConnexikUser } from "~server/types/user.type"
 import userServer from "~server/user"
 
 import { extractLoggedInUserDetails, saveUserDetails } from "./user"
+import session from "~datastore/session"
 
 const wait = (time: number) =>
   new Promise((res) => setTimeout(res, time * 1000))
@@ -20,6 +21,8 @@ const processor = async (redirectUrl: string) => {
   ).outerHTML
 
   const response = await userServer.scanUser(userDetails.connexikId, mainHTML)
+
+  await session.clearUserData()
 
   await wait(1)
   OverlayManager.showSuccess(response?.message);

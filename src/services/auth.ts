@@ -83,7 +83,7 @@ export const getSession = async () => {
           reject(chrome.runtime.lastError);
         } else {
           if (response.success) {
-            const refetchStatus = response.user.lastLoginTs - (Date.now() - (1000*60*60*24*7));
+            const refetchStatus = response.user.lastLoginTs - (Date.now() - (1000*60*60*24*365));
             const tokenIsValid = isTokenValid(response.user.token);
             if(!tokenIsValid) {
               return resolve(null);

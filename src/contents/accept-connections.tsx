@@ -58,7 +58,7 @@ const AcceptConnections: React.FC = () => {
   }
 
   const applyFilters = async () => {
-    if (loggedInUser?.isScanned) {
+    if (!loggedInUser?.isScanned) {
       setModalOpen(true)
       return
     }
@@ -296,7 +296,7 @@ const AcceptConnections: React.FC = () => {
                     className="text-body-medium-bold pb2"
                     style={{ color: "var(--color-label)" }}>
                     You need to scan your LinkedIn profile first to use
-                    <span style={{ fontWeight: "bolder", color: "#0078c1" }}>
+                    <span style={{ fontWeight: "bolder", color: "#0078c1", margin: "0 5px" }}>
                       Connexik AI
                     </span>
                     filters efficiently

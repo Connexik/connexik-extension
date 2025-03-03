@@ -1,6 +1,6 @@
 import type { ConnexikUser, UserDetails } from "./types/user.type"
 import config, { SESSION_STATUS } from "~config";
-import userServer from '../datastore/session';
+import sessionStore from '../datastore/session';
 import { getSession } from "~services/auth";
 
 const getUserDetails = async ({ identifier, username, title, firstName, lastName, profileUrl }: UserDetails): Promise<ConnexikUser> => {
@@ -39,7 +39,7 @@ const getUserDetails = async ({ identifier, username, title, firstName, lastName
     profileUrl,
   }
 
-  await userServer.setUserData(finalData);
+  await sessionStore.setUserData(finalData);
   return finalData;
 }
 

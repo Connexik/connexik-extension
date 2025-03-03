@@ -42,7 +42,9 @@ const processAIFiltering = async (
 
     const statusMessage = () => {
       if (status === "accept") {
-        // button.click();
+        console.log("statusMessage - ")
+        console.log(fullName, button, status, relevantUser, cardsObj)
+        button.click();
         return [
           `🤝 ConnexikAI is firing off a connection request to ${fullName}`, 
           `because: "${relevantUser.reason}"`, 
@@ -90,7 +92,7 @@ const processAllConnextions = async (
 
     await wait(1)
 
-    // card.button.click();
+    card.button.click();
 
     OverlayManager.showMultiple([...basicMessage, message])
   }
@@ -138,7 +140,7 @@ const processCohortCards =
           }
 
           const userRefs = card.querySelectorAll("p")
-          const userButton = card.querySelectorAll("button")
+          const userButton = card.querySelector('div[data-view-name="edge-creation-connect-action"] button');
 
           userArr.push({
             username: username,

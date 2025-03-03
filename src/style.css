@@ -151,7 +151,7 @@ h2 > .connexik-pymk-show {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 99999; /* Ensure it's above other elements */
+  z-index: 99999999; /* Ensure it's above other elements */
 }
 
 .connexik-modal-container {

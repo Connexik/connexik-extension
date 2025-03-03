@@ -1,5 +1,5 @@
 export default {
-    SERVER_URL: 'https://f452-2404-7c80-5c-d072-9c4b-b62f-1260-3a43.ngrok-free.app'
+    SERVER_URL: 'https://a4f3-2404-7c80-5c-d072-640a-2ed9-8604-34d1.ngrok-free.app'
 };
 
 export const INTER_EVENTS = {
