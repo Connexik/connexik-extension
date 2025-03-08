@@ -1,7 +1,7 @@
 {
   "name": "connexik-extension",
   "displayName": "Connexik Extension",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Automate your LinkedIn networking with smart tools to accept connection requests and grow your professional reach effortlessly.",
   "author": "Deepam Kapur <deepamkapur@gmail.com>",
   "scripts": {
@@ -60,10 +60,7 @@
     ],
     "permissions": [
       "identity",
-      "tabs",
-      "storage",
-      "alarms",
-      "scripting"
+      "storage"
     ]
   }
 }

@@ -11,9 +11,13 @@ const Popup = () => {
 
   useEffect(() => {
     const checkSession = async () => {
-      const session = await getSession()
-      if (session) {
-        setSessionData(session)
+      try{
+        const session = await getSession()
+        if (session) {
+          setSessionData(session)
+        }
+      } catch(e){
+        console.log(e)
       }
     }
 

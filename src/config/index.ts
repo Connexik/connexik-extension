@@ -1,5 +1,5 @@
 export default {
-    SERVER_URL: 'https://a4f3-2404-7c80-5c-d072-640a-2ed9-8604-34d1.ngrok-free.app'
+    SERVER_URL: 'https://api.connexik.com'
 };
 
 export const INTER_EVENTS = {
