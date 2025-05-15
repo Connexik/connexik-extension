@@ -92,7 +92,7 @@ const pymkProcess = (ele, button = true) => {
   const firstChild = ele.firstElementChild
   if (!firstChild) return
 
-  const headingEle = firstChild.querySelector("h2")
+  const headingEle = firstChild.querySelector("h2") || firstChild.querySelector("p")
   if (!headingEle) return
 
   const headingText = headingEle.innerText
@@ -150,9 +150,11 @@ const pymkProcess = (ele, button = true) => {
 
 const getPYMK = (prevData = {}) => {
   const finalData = { ...prevData }
-  const pymkData = document.querySelectorAll(
-    '[data-view-name="cohorts-section-pymk"]>section>div'
-  )
+  const pymkData = [...document.querySelectorAll(
+    '[data-view-name="cohorts-section-pymk"] > div'
+  ), ...document.querySelectorAll(
+    '[data-view-name="cohorts-section-pymk"]> section > div'
+  )]
 
   for (let ele of pymkData) {
     const finalObj = pymkProcess(ele)
@@ -187,7 +189,11 @@ const getPYMK = (prevData = {}) => {
         '[data-view-name="cohorts-section-pfollows"]'
       )
     }
-    pymkEle?.parentElement?.lastElementChild?.querySelector("button")?.click()
+    const buttonElement = pymkEle?.parentElement?.lastElementChild?.querySelector("button");
+
+    if (buttonElement?.textContent?.trim().toLowerCase() === "load more") {
+      buttonElement.click();
+    }
   }
 
   return { data: finalData, final }
@@ -199,11 +205,28 @@ const NetworkGrow: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false)
 
   useEffect(() => {
+    let retries = 0;
     intervalNetworkGrowId = setInterval(() => {
       const { final, data } = getPYMK(pymkData)
       if (final) {
         clearInterval(intervalNetworkGrowId)
       }
+
+      if(!Object.keys(data).length && (retries == 2 || (retries > 2 && retries % 5 === 0))){
+        try{
+          const buttons = document.querySelectorAll(
+            '[data-view-name="cohorts-list"]>div>div>button'
+          );
+
+          if (buttons.length > 0) {
+            (buttons[buttons.length - 1] as HTMLButtonElement)?.click();
+          }
+        } catch(e){
+          console.error('Error clicking button:', e);
+        }
+      }
+
+      retries++;
 
       setPYMKData(data)
     }, 1000)

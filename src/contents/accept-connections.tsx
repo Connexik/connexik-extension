@@ -5,6 +5,7 @@ import type {
 } from "plasmo"
 import React, { useEffect, useState } from "react"
 import { createRoot } from "react-dom/client"
+import OverlayManager from "~components/loader"
 
 import type { ConnexikUser } from "~server/types/user.type"
 import {

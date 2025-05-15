@@ -2,6 +2,8 @@ import OverlayManager from "~components/loader"
 import connections from "~server/connections"
 import { wait } from "~utils/common"
 
+const test = false;
+
 const commonAcceptConnections = async () => {
   OverlayManager.show("Extracting data from Pending Invitations...")
 
@@ -86,7 +88,7 @@ const commonAcceptConnections = async () => {
   }
 
   if (!invitationData.length) {
-    OverlayManager.showSuccess(`No new network connection requests to analyze`)
+    OverlayManager.showSuccess("No new network connection requests to analyze")
     await wait(2)
     OverlayManager.hide()
     return
@@ -137,10 +139,10 @@ export const acceptFilterConnections = async (connexikId, filters) => {
   }
 
   const basicMessage = [
-    `🎉 Connexik AI just worked its magic on ${responseData.relevantUsers.length} invitations!`,
+    "🎉 Connexik AI just worked its magic on "+responseData.relevantUsers.length+" invitations!",
     responseData.remainingFilterationCount
-      ? `✨ Great news! You can process ${responseData.remainingFilterationCount} more invitations today. Keep going! 🚀`
-      : `😴 After this, you've hit today's filter limit. Recharge and come back tomorrow for more fun! 🌟`
+      ? "✨ Great news! You can process "+responseData.remainingFilterationCount+" more invitations today. Keep going! 🚀"
+      : "😴 After this, you've hit today's filter limit. Recharge and come back tomorrow for more fun! 🌟"
   ]
 
   OverlayManager.showMultiple([...basicMessage])
@@ -154,17 +156,17 @@ export const acceptFilterConnections = async (connexikId, filters) => {
 
     const statusMessage = () => {
       if (status === "accept") {
-        buttons.accept.click();
-        return `✅ ConnexikAI has graciously accepted ${fullName}'s invitation because: "${relevantUser.reason}" Cheers to good reasoning! 🎉`
+        !test && buttons.accept.click();
+        return "✅ ConnexikAI has graciously accepted "+fullName+"'s invitation because: \""+relevantUser.reason+"\" Cheers to good reasoning! 🎉"
       } else if (status === "ignore") {
         if (filters.ignore) {
-          buttons.ignore.click();
-          return `❌ ConnexikAI has decided to reject ${fullName}'s invitation due to: "${relevantUser.reason}" Sometimes tough choices must be made. 💔`
+          !test && buttons.ignore.click();
+          return "❌ ConnexikAI has decided to reject "+fullName+"'s invitation due to: \""+relevantUser.reason+"\" Sometimes tough choices must be made. 💔"
         } else {
-          return `⏭️ ConnexikAI skipped ${fullName}'s invitation due to: "${relevantUser.reason}" On to the next one! 🚀`
+          return "⏭️ ConnexikAI skipped "+fullName+"'s invitation due to: \""+relevantUser.reason+"\" On to the next one! 🚀"
         }
       } else {
-        return `🤔 ConnexikAI is pondering what to do with ${fullName}'s invitation. Stay tuned! 🕒`
+        return "🤔 ConnexikAI is pondering what to do with "+fullName+"'s invitation. Stay tuned! 🕒"
       }
     }
 
@@ -174,7 +176,7 @@ export const acceptFilterConnections = async (connexikId, filters) => {
   }
 
   OverlayManager.showSuccess(
-    `🙏 Thank you for choosing ConnexikAI. Come back soon to make your LinkedIn network even better! 💼✨`
+    "🙏 Thank you for choosing ConnexikAI. Come back soon to make your LinkedIn network even better! 💼✨"
   )
 
   await wait(2)
@@ -190,8 +192,8 @@ export const acceptAllConnections = async (connexikId) => {
   const { invitationData, invitationRef } = connectionsData
 
   const basicMessage = [
-    `🎉 Connexik AI is going to accept ${invitationData.length} invitations!`,
-    `😴 To control the LinkedIn's restrictions we are going to accept 1 call/second 🌟`
+    "🎉 Connexik AI is going to accept "+invitationData.length+" invitations!",
+    "😴 To control the LinkedIn's restrictions we are going to accept 1 call/second 🌟"
   ]
 
   OverlayManager.showMultiple([...basicMessage])
@@ -201,14 +203,14 @@ export const acceptAllConnections = async (connexikId) => {
 
      await wait(1)
 
-     const message = `Accepting request - ${userRef.name}`
+     const message = "Accepting request - "+userRef.name
      OverlayManager.showMultiple([...basicMessage, message])
 
-     userRef.buttons.accept.click();
+     !test && userRef.buttons.accept.click();
   }
 
   OverlayManager.showSuccess(
-    `🙏 Thank you for choosing ConnexikAI. Come back soon to make your LinkedIn network even better! 💼✨`
+    "🙏 Thank you for choosing ConnexikAI. Come back soon to make your LinkedIn network even better! 💼✨"
   )
 
   await wait(2)

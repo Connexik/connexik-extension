@@ -21,7 +21,7 @@ const Overlay = ({ message, visible, success, error }) => {
         zIndex: 9999,
       }}
     >
-      <div style={{ textAlign: "center", marginBottom: "5%" }}>
+      <div style={{ textAlign: "center", marginBottom: "5%", width: "70%" }}>
         {success ? (
           <div style={styles.successContainer}>
             <svg

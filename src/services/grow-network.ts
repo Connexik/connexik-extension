@@ -6,6 +6,8 @@ import { wait } from "~utils/common"
 import { showConfirmationDialog } from "../components/confirmation"
 import { extractLoggedInUserDetails } from "./user"
 
+const test = false;
+
 const processAIFiltering = async (
   loggedInUser: ConnexikUser,
   filter: string,
@@ -30,7 +32,7 @@ const processAIFiltering = async (
   }
 
   const basicMessage = [
-    `🎉 Connexik AI just worked its magic on ${responseData.relevantUsers.length} users!`,
+    "🎉 Connexik AI just worked its magic on " + responseData.relevantUsers.length + " users!",
   ]
 
   OverlayManager.showMultiple([...basicMessage])
@@ -44,22 +46,22 @@ const processAIFiltering = async (
       if (status === "accept") {
         console.log("statusMessage - ")
         console.log(fullName, button, status, relevantUser, cardsObj)
-        button.click();
+        !test && button.click();
         return [
-          `🤝 ConnexikAI is firing off a connection request to ${fullName}`, 
-          `because: "${relevantUser.reason}"`, 
-          `Here's to building bridges and making waves! 🌊✨`
+          "🤝 ConnexikAI is firing off a connection request to " + fullName,
+          "because: \"" + relevantUser.reason + "\"",
+          "Here's to building bridges and making waves! 🌊✨"
         ]
       } else if (status === "ignore") {
         return [
-          `🚫 ConnexikAI opted to skip connecting with ${fullName}`,
-          `due to: "${relevantUser.reason}"`,
-          `No hard feelings, just keeping it moving! 🚀`
+          "🚫 ConnexikAI opted to skip connecting with " + fullName,
+          "due to: \"" + relevantUser.reason + "\"",
+          "No hard feelings, just keeping it moving! 🚀"
         ]
       } else {
         return [
-          `🤔 ConnexikAI is in deep thought about connecting with ${fullName}.`,
-          `Big decisions take time, so hang tight! 🕒`
+          "🤔 ConnexikAI is in deep thought about connecting with " + fullName + ".",
+          "Big decisions take time, so hang tight! 🕒"
         ]
       }
     }
@@ -75,8 +77,8 @@ const processAllConnextions = async (
   cardsObj: object
 ) => {
   const basicMessage = [
-    `🎉 Connexik AI is ready to grow your network!`,
-    `😴 To comply with LinkedIn's restrictions, we will send requests at a rate of 1 call per second 🌟`
+    "🎉 Connexik AI is ready to grow your network!",
+    "😴 To comply with LinkedIn's restrictions, we will send requests at a rate of 1 call per second 🌟"
   ]
 
   OverlayManager.showMultiple([...basicMessage])
@@ -88,11 +90,12 @@ const processAllConnextions = async (
       break
     }
 
-    const message = `Accepting request - ${card.fullName}, Remaining ${--remainingCount}`
+    --remainingCount;
+    const message = "Accepting request - " + card.fullName + ", Remaining " + remainingCount
 
     await wait(1)
 
-    card.button.click();
+    !test && card.button.click();
 
     OverlayManager.showMultiple([...basicMessage, message])
   }
@@ -117,7 +120,7 @@ const processCohortCards =
           const buttonEle =
             cards[0].parentElement?.lastElementChild?.firstElementChild
           if (buttonEle.tagName === "BUTTON") {
-            buttonEle.click()
+            !test && buttonEle.click()
           }
 
           return
@@ -166,11 +169,11 @@ const processCohortCards =
           }
 
           OverlayManager.showSuccess(
-            `🙏 Thank you for choosing ConnexikAI. Come back soon to make your LinkedIn network even better! 💼✨`
+            "🙏 Thank you for choosing ConnexikAI. Come back soon to make your LinkedIn network even better! 💼✨"
           )
         } else {
           OverlayManager.showSuccess(
-            `🙏 No valid connection available! Please try again later 💼✨`
+            "🙏 No valid connection available! Please try again later 💼✨"
           )
         }
 
